@@ -115,8 +115,5 @@
   <ItemGroup>
     <Resource Include="images\osaka-removebg-preview.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\input.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

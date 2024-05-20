@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
+using System.IO;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,7 +25,8 @@ namespace HungryBirds
     public partial class MainWindow : Window
     {
         List<Obstacle> obstacles = new List<Obstacle>(); //список, где хранятся препятствия
-        private string filePath = @"C:\Users\User\source\repos\HungryBirds\HungryBirds\images\input.txt";
+        //private string currentFilePath = "pack://application:,,,/images/input.txt";
+        private string currentFilePath;
         public MainWindow()
         {
             InitializeComponent();
@@ -42,13 +45,52 @@ namespace HungryBirds
             MakeObstacle();
         } //триггер для функии
 
-        private void Button_Click(object sender, RoutedEventArgs e) { } // ввод через файл
-
-        private void Button_Click_1(object sender, RoutedEventArgs e) // реализация кнопки feed
+        private void Button_Click(object sender, RoutedEventArgs e) // ввод через файл как в главе 26
         {
-            double angle = Convert.ToDouble(getAngle());
-            double veloc = Convert.ToDouble(getVeloc());
-            Fly(angle, veloc);
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                currentFilePath = openFileDialog.FileName;
+
+                try
+                {
+                    var lines = File.ReadLines(currentFilePath).ToList();
+
+                    if (lines.Count >= 2)
+                    {
+                        string firstangle = lines[0];
+                        string seconveloc = lines[1];
+                        textbox1.Text = firstangle;
+                        textbox2.Text = seconveloc;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Not enought data to operate with.");
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("An unknown error occurred");
+                }
+            }
+        }
+                private void Button_Click_1(object sender, RoutedEventArgs e) // реализация кнопки feed
+            {
+            try
+            {
+                double angle = Convert.ToDouble(getAngle());
+                double veloc = Convert.ToDouble(getVeloc());
+                Fly(angle, veloc);
+            }
+            catch (Exception ex) when (ex is FormatException || ex is OverflowException)
+            {
+                MessageBox.Show("Invalid input.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred.");
+            }
         }
 
         string getAngle() { return textbox1.Text; } //чтобы вытащить строки из текстбоксов
@@ -78,9 +120,11 @@ namespace HungryBirds
                 velY1 -= timeStep * (g + k * velY1);
                 velX1 -= timeStep * k * velX1;
 
+                int collisionCount = 0;
                 // проверяем на предмет коллизии: максимальное расстояние между центрами соприкасающихся прямоугольников = 95.6
-                foreach (Obstacle obstacle in obstacles)
+                for (int i = 0; i < obstacles.Count; i++)
                 {
+                    Obstacle obstacle = obstacles[i];
                     double ObscenterX = Canvas.GetLeft(obstacle.Rectangle) + (obstacle.Rectangle.ActualWidth / 2);
                     double ObscenterY = Canvas.GetTop(obstacle.Rectangle) + (obstacle.Rectangle.ActualHeight / 2);
                     double FoodcenterX = Canvas.GetLeft(food.Rectangle) + (food.Rectangle.ActualWidth / 2);
@@ -88,13 +132,14 @@ namespace HungryBirds
                     double length = Math.Sqrt(Math.Pow((ObscenterX - FoodcenterX), 2) + Math.Pow((ObscenterY - FoodcenterY), 2));
                     if (length < 95.6)
                     {
-                        // удаляем оба объекта
+                        // Удаляем при столкновении
                         hungrybirdcanvas.Children.Remove(food.Rectangle);
                         hungrybirdcanvas.Children.Remove(obstacle.Rectangle);
-                        obstacles.Remove(obstacle); //удаляем из списка, чтобы освободить координаты
+                        obstacles.RemoveAt(i); // удаляем из списка
 
-                        // ресетим таймер
-                        //scoretext.Content = "Score:" + (++n); пока не работает
+                        collisionCount++;
+                        scoretext.Content = "Score: " + collisionCount;
+
                         timer.Stop();
                         return;
                     }
@@ -127,7 +172,7 @@ namespace HungryBirds
                     Width = 80,
                     Fill = new ImageBrush
                     {
-                        ImageSource = new BitmapImage(new Uri("C:\\Users\\User\\source\\repos\\HungryBirds\\HungryBirds\\images\\bird.png"))
+                        ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/bird.png"))
                     }
                 };
 
@@ -146,7 +191,7 @@ namespace HungryBirds
                 Height = 50,
                 Fill = new ImageBrush
                 {
-                    ImageSource = new BitmapImage(new Uri("C:\\Users\\User\\source\\repos\\HungryBirds\\HungryBirds\\images\\onigiri-removebg-preview.png"))
+                    ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/onigiri-removebg-preview.png"))
                 }
             };
                 Canvas.SetLeft(Rectangle, 0);
