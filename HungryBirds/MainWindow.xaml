@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Hungry Birds" Height="500" Width="800" Icon="/images/bird.png">
     <Window.Background>
-        <ImageBrush ImageSource="C:\Users\User\source\repos\HungryBirds\HungryBirds\images\kitchen.jpg"></ImageBrush>
+        <ImageBrush ImageSource="images\kitchen.jpg"></ImageBrush>
     </Window.Background>
     <Canvas Name="hungrybirdcanvas" Focusable="true" MouseLeftButtonDown="ClickOnCanvas" Height="500">
 
@@ -23,7 +23,7 @@
                 </TransformGroup>
             </Rectangle.RenderTransform>
             <Rectangle.Fill>
-                <ImageBrush ImageSource="C:\Users\User\source\repos\HungryBirds\HungryBirds\images\osaka-removebg-preview.png"/>
+                <ImageBrush ImageSource="images\osaka-removebg-preview.png"/>
             </Rectangle.Fill>
         </Rectangle>
         <Label Content="Click on Osaka to spawn birds!" Foreground="Black" Canvas.Top="428" Background="Wheat"
